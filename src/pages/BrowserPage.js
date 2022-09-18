@@ -10,9 +10,16 @@ import {
   TouchableOpacity,
   RefreshControl,
   ScrollView,
+  Linking,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { bg_color, primary_color } from "../utils/color";
+import { getLocationStorage, setLocationStorage } from "../utils/storage";
+import * as Location from "expo-location";
+import MessageView from "../component/common/MessageView";
+import CustomeButton from "../component/common/CustomeButton";
+import { arePointsNear } from "../utils/locationHelper";
+import { _MARKZ_BADR_EREA } from "../utils/database";
 
 const INJECTED_JS = `
   window.onscroll = function() {
@@ -24,14 +31,8 @@ const INJECTED_JS = `
   }
 `;
 
-const SCROLLVIEW_CONTAINER = {
-  flex: 1,
-  height: "100%",
-};
-const WEBVIEW = (height) => ({
-  width: "100%",
-  height,
-});
+const SCROLLVIEW_CONTAINER = { flex: 1, height: "100%" };
+const WEBVIEW = (height) => ({ width: "100%", height });
 
 export default function BrowserPage() {
   const [isReloadPage, setIsReloadPage] = useState(false);
@@ -39,21 +40,74 @@ export default function BrowserPage() {
   const [isShowWV, setIsShowWV] = useState(false);
   const [navigationOptions, setNavigationOptions] = useState({});
   const { height, width } = useWindowDimensions();
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [isPullToRefreshEnabled, setisPullToRefreshEnabled] = useState(true);
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const webViewRef = useRef(null);
+  // For location
+  const [isMarkzBadr, setIsMarkzBadr] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  // const [errorMsg, setErrorMsg] = useState("جاري التحميل...");
+  const [LP, setLP] = useState(null);
+  const [revLocation, setRevLocation] = useState("");
 
+  useEffect(() => {
+    if (isMarkzBadr === null) {
+      (async () => {
+        const oldLocation = await getLocationStorage();
+        if (oldLocation) {
+          setLP(true);
+          const isInArea = arePointsNear(
+            oldLocation.coords,
+            _MARKZ_BADR_EREA,
+            _MARKZ_BADR_EREA.area
+          );
+          setIsMarkzBadr(isInArea);
+          // const { region } = oldLocation[0];
+
+          // setIsMarkzBadr(
+          //   region?.includes("Beheira") || region?.includes("بحيرة")
+          // );
+        }
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setLP(false);
+          setErrorMsg("تم رفض إذن الوصول إلى الموقع.");
+          return;
+        }
+        const location = await Location.getCurrentPositionAsync({});
+
+        // const revLocation = await Location.reverseGeocodeAsync(location.coords);
+        // console.log("Rev location: ", revLocation);
+        // setRevLocation(revLocation);
+        // setErrorMsg("جاري التحميل...");
+        setLP(true);
+
+        const isInArea = arePointsNear(
+          location.coords,
+          _MARKZ_BADR_EREA,
+          _MARKZ_BADR_EREA.area
+        );
+        setIsMarkzBadr(isInArea);
+
+        // const { region } = revLocation[0];
+        // setIsMarkzBadr(
+        //   region?.includes("Beheira") || region?.includes("بحيرة")
+        // );
+        // setLocationStorage(revLocation);
+        setLocationStorage(location);
+      })();
+    }
+
+    BackHandler.addEventListener("hardwareBackPress", goBack);
+    return () => BackHandler.removeEventListener("hardwareBackPress", goBack);
+  }, [navigationOptions]);
+
+  console.log("isMarkz badr: ", isMarkzBadr);
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     webViewRef.current.reload();
   }, []);
-
-  useEffect(() => {
-    BackHandler.addEventListener("hardwareBackPress", goBack);
-
-    return () => BackHandler.removeEventListener("hardwareBackPress", goBack);
-  }, [navigationOptions]);
 
   const goBack = () => {
     if (navigationOptions.canGoBack) {
@@ -111,6 +165,23 @@ export default function BrowserPage() {
     } catch (error) {}
   };
 
+  if (LP === false || isMarkzBadr === null) {
+    return (
+      <MessageView
+        message={errorMsg}
+        btn={
+          LP === false && (
+            <CustomeButton
+              text={"افتح الضبط"}
+              onPress={() => Linking.openSettings()}
+              style={{ marginTop: 40 }}
+            />
+          )
+        }
+      />
+    );
+  }
+
   return (
     <ScrollView
       style={SCROLLVIEW_CONTAINER}
@@ -140,12 +211,10 @@ export default function BrowserPage() {
           <WebView
             ref={webViewRef}
             source={{
-              uri: "https://dukkaany.com",
+              uri: isMarkzBadr
+                ? "https://dukkaany.com/bard-landing-page/"
+                : "https://dukkaany.com",
             }}
-            // style={{
-            //   width: Dimensions.get("window").width,
-            //   height: isShowMessage ? height : 0,
-            // }}
             onNavigationStateChange={navChange}
             onLoadStart={() => {
               // setLoader(false);
@@ -159,6 +228,7 @@ export default function BrowserPage() {
               setRefreshing(false);
               setIsShowMessage(true);
             }}
+            nestedScrollEnabled={true}
             // startInLoadingState={true}
             // renderLoading={() => <AppLoader />}
             // pullToRefreshEnabled={true}
@@ -179,10 +249,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: Dimensions.get("window").width,
   },
-  center: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  center: { justifyContent: "center", alignItems: "center" },
   btn: {
     padding: 16,
     paddingHorizontal: 38,

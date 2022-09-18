@@ -20,11 +20,11 @@ export async function getFCMToken() {
     try {
       FCMToken = await messaging().getToken();
       if (FCMToken) {
-        console.log("New Token: ", FCMToken);
+        // console.log("New Token: ", FCMToken);
         await AsyncStorage.setItem(FCM_TOKEN_KEY, FCMToken);
       }
     } catch (e) {
-    //   console.log("error: ", e);
+      //   console.log("error: ", e);
     }
   } else {
     // console.log("Old Token: ", FCMToken);
@@ -36,13 +36,18 @@ export const notificationListener = () => {
   // Assume a message-notification contains a "type" property in the data payload of the screen to open
 
   messaging().onNotificationOpenedApp((remoteMessage) => {
-    // console.log(
-    //   "Notification caused app to open from background state:",
-    //   remoteMessage.notification
-    // );
+    console.log(
+      "Notification caused app to open from background state:",
+      remoteMessage.notification
+    );
     // navigation.navigate(remoteMessage.data.type);
   });
 
+  // Register background handler
+  messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+    console.log("Message handled in the background!", remoteMessage);
+  });
+  
   // Check whether an initial notification is available
   messaging()
     .getInitialNotification()

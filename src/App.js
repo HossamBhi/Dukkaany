@@ -1,29 +1,44 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { StyleSheet, View, Dimensions } from "react-native";
-import HomePage from "./pages/HomePage";
 import Constants from "expo-constants";
 import { primary_color } from "./utils/color";
 import {
   notificationListener,
   requestUserPermission,
 } from "./utils/puchNotificationHelper";
+// import MainStack from "./navigation";
+// import { NavigationContainer } from "@react-navigation/native";
+import { getLocationStorage } from "./utils/storage";
+import BrowserPage from "./pages/BrowserPage";
+
 export default function App() {
-  useEffect(() => {
+  // const [hasLocation, setHasLocation] = useState(null);
+
+  useEffect( () => {
+    // const location = await getLocationStorage();
+    // setHasLocation(location == null ? false : true);
     requestUserPermission();
     notificationListener();
   }, []);
 
+  // if (hasLocation === null) return null;
+
   return (
-    <View style={styles.container}>
-      <HomePage />
-      <StatusBar
-        style="light"
-        animated
-        backgroundColor={primary_color}
-        translucent
-      />
-    </View>
+    // <NavigationContainer>
+      <View style={styles.container}>
+        {/* <HomePage /> */}
+        {/* <MainStack hasLocation={hasLocation} /> */}
+        {/* <MainStack  /> */}
+        <BrowserPage />
+        <StatusBar
+          style="light"
+          animated
+          backgroundColor={primary_color}
+          translucent
+        />
+      </View>
+    // </NavigationContainer>
   );
 }
 

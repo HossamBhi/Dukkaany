@@ -100,7 +100,7 @@ apply from: new File(["node", "--print", "require.resolve('react-native/package.
  * Upload all the APKs to the Play Store and people will download
  * the correct one based on the CPU architecture of their device.
  */
-def enableSeparateBuildPerCPUArchitecture = true
+def enableSeparateBuildPerCPUArchitecture = false
 //def enableSeparateBuildPerCPUArchitecture = false
 
 /**
@@ -147,8 +147,8 @@ android {
         applicationId "com.elite.dukkaany"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 4194310
+        versionName "1.0.4"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
         if (isNewArchitectureEnabled()) {
@@ -242,7 +242,7 @@ android {
     }
     signingConfigs {
         release {
-        storeFile file('your_key_name.keystore')
+        storeFile file('my-upload-key.keystore')
         storePassword 'your_key_store_password'
         keyAlias 'your_key_alias'
         keyPassword 'your_key_file_alias_password'
@@ -301,6 +301,9 @@ android {
 }
 
 dependencies {
+    //    facebook add event
+    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
+
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:30.1.0')
 
