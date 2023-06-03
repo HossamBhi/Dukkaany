@@ -1,23 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  FlatList,
-  useWindowDimensions,
-  Linking,
-} from "react-native";
+import { View, StyleSheet, Text, Linking } from "react-native";
 import CustomeButton from "../component/common/CustomeButton";
-import { bg_color } from "../utils/color";
-import { PLACES, _MARKZ_BADR_EREA } from "../utils/database";
+import { _MARKZ_BADR_EREA } from "../utils/database";
 import * as Location from "expo-location";
 import MessageView from "../component/common/MessageView";
-import { arePointsNear } from "../utils/locationHelper";
 import { setLocationStorage } from "../utils/storage";
 
 export default ({ navigation }) => {
-  const { height } = useWindowDimensions();
-
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState("جاري التحميل...");
   const [LP, setLP] = useState(null);

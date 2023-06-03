@@ -34,7 +34,7 @@ const INJECTED_JS = `
 const SCROLLVIEW_CONTAINER = { flex: 1, height: "100%" };
 const WEBVIEW = (height) => ({ width: "100%", height });
 
-export default function BrowserPage() {
+export default function BrowserPage({ place }) {
   const [isReloadPage, setIsReloadPage] = useState(false);
   const [isShowMessage, setIsShowMessage] = useState(false);
   const [isShowWV, setIsShowWV] = useState(false);
@@ -103,7 +103,6 @@ export default function BrowserPage() {
     return () => BackHandler.removeEventListener("hardwareBackPress", goBack);
   }, [navigationOptions]);
 
-  console.log("isMarkz badr: ", isMarkzBadr);
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     webViewRef.current.reload();
@@ -211,7 +210,9 @@ export default function BrowserPage() {
           <WebView
             ref={webViewRef}
             source={{
-              uri: isMarkzBadr
+              uri: place
+                ? `https://dukkaany.com/store/${place}/`
+                : isMarkzBadr
                 ? "https://dukkaany.com/bard-landing-page/"
                 : "https://dukkaany.com",
             }}

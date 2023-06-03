@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name">Dukkaany</string>
+    <string name="app_name">Volt Shopping</string>
     <string name="facebook_app_id">1385578328599591</string>
     <string name="fb_login_protocol_scheme">fb1385578328599591</string>
     <string name="facebook_client_token">ef5a9e96c375a9efc05b00e62fcf5834</string>
+    <!-- <string name="expo_splash_screen_resize_mode" translatable="false">cover</string>
+    <string name="expo_splash_screen_status_bar_translucent" translatable="false">true</string> -->
 </resources>
